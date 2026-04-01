@@ -1,0 +1,158 @@
+name: CI — Cloud
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "cloud/**"
+      - ".github/workflows/ci-cloud.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "cloud/**"
+
+defaults:
+  run:
+    working-directory: cloud
+
+jobs:
+  # ── Lint ──────────────────────────────────────
+  lint:
+    name: Lint & Style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: cloud
+
+      - name: RuboCop
+        run: bundle exec rubocop --format github
+
+  # ── Tests ─────────────────────────────────────
+  test:
+    name: Tests (PostgreSQL)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: resilios
+          POSTGRES_PASSWORD: resilios_test
+          POSTGRES_DB: resilios_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 10s
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgresql://resilios:resilios_test@localhost:5432/resilios_test
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY_BASE: test_secret_key_base_for_ci_only
+      NODE_TOKEN_HMAC_SECRET: test_hmac_secret_64_chars_padded_here_for_ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: cloud
+
+      - name: Setup DB
+        run: bundle exec rails db:create db:schema:load
+
+      - name: Run tests
+        run: bundle exec rails test --format progress
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloud-coverage
+          path: cloud/coverage/
+
+  # ── Sync Engine Integration Tests ────────────
+  sync-integration:
+    name: Sync Engine Integration
+    runs-on: ubuntu-latest
+    needs: test
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: resilios
+          POSTGRES_PASSWORD: resilios_test
+          POSTGRES_DB: resilios_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgresql://resilios:resilios_test@localhost:5432/resilios_test
+      SECRET_KEY_BASE: test_secret_key_base_for_ci_only
+      NODE_TOKEN_HMAC_SECRET: test_hmac_secret_64_chars_padded_here_for_ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: cloud
+
+      - name: Setup DB
+        run: bundle exec rails db:create db:schema:load
+
+      - name: Run sync integration tests
+        run: bundle exec rails test test/integration/sync/ --format progress
+
+  # ── Deploy a Staging (solo en main) ──────────
+  deploy-staging:
+    name: Deploy → Staging
+    runs-on: ubuntu-latest
+    needs: [lint, test, sync-integration]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby (Kamal)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Install Kamal
+        run: gem install kamal
+
+      - name: Deploy via Kamal
+        working-directory: cloud
+        env:
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          kamal deploy --destination staging

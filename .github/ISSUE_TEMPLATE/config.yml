@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentación de instalación
+    url: https://github.com/TU_ORG/resilios/blob/main/edge/INSTALL.md
+    about: Guía paso a paso para instalar el nodo Edge

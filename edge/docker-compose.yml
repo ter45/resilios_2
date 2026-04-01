@@ -1,0 +1,95 @@
+version: "3.9"
+
+# ══════════════════════════════════════════════
+#  ResiliOS — Nodo Edge Local
+#  Instalación: docker compose up
+#  Requiere: Docker >= 24, Docker Compose >= 2.20
+# ══════════════════════════════════════════════
+
+services:
+  # ── API Rails offline-first ──────────────────
+  edge_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resilios_edge_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - edge_db:/app/storage          # SQLite WAL persistente
+      - edge_logs:/app/log
+    environment:
+      - RAILS_ENV=${RAILS_ENV:-production}
+      - RESILIOS_CLOUD_URL=${RESILIOS_CLOUD_URL}
+      - RESILIOS_NODE_TOKEN=${RESILIOS_NODE_TOKEN}
+      - RESILIOS_NODE_ID=${RESILIOS_NODE_ID}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - resilios_local
+    depends_on:
+      - sync_agent
+
+  # ── Agente de sincronización background ─────
+  sync_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resilios_sync_agent
+    restart: unless-stopped
+    command: bundle exec rails runner "SyncAgent.run_forever"
+    volumes:
+      - edge_db:/app/storage
+      - edge_logs:/app/log
+    environment:
+      - RAILS_ENV=${RAILS_ENV:-production}
+      - RESILIOS_CLOUD_URL=${RESILIOS_CLOUD_URL}
+      - RESILIOS_NODE_TOKEN=${RESILIOS_NODE_TOKEN}
+      - RESILIOS_NODE_ID=${RESILIOS_NODE_ID}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - SYNC_INTERVAL_SECONDS=${SYNC_INTERVAL_SECONDS:-30}
+    networks:
+      - resilios_local
+
+  # ── PWA Frontend (servida estáticamente) ────
+  edge_web:
+    image: nginx:alpine
+    container_name: resilios_edge_web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public/pwa:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - resilios_local
+    depends_on:
+      - edge_api
+
+  # ── KDS — Kitchen Display System ─────────────
+  edge_kds:
+    image: nginx:alpine
+    container_name: resilios_kds
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./public/kds:/usr/share/nginx/html:ro
+    networks:
+      - resilios_local
+
+volumes:
+  edge_db:
+    driver: local
+  edge_logs:
+    driver: local
+
+networks:
+  resilios_local:
+    driver: bridge

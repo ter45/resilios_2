@@ -1,0 +1,93 @@
+name: "Historia de Usuario"
+description: "Nueva funcionalidad definida como User Story"
+title: "[US] "
+labels: ["type:story"]
+body:
+  - type: dropdown
+    id: epic
+    attributes:
+      label: Épica
+      options:
+        - "E-01 — Operación Offline Completa"
+        - "E-02 — Sincronización Automática"
+        - "E-03 — Instalación y Onboarding"
+        - "E-04 — Gestión desde la Nube"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: wp
+    attributes:
+      label: Paquete de Trabajo (WBS)
+      options:
+        - "WP-1.1 — Repositorio y monorepo"
+        - "WP-1.2 — Entorno Docker Edge"
+        - "WP-1.3 — Entorno Cloud"
+        - "WP-1.4 — Autenticación multi-tenant"
+        - "WP-1.5 — GitHub Projects setup"
+        - "WP-2.1 — Modelo de datos Edge"
+        - "WP-2.2 — API local REST"
+        - "WP-2.3 — PWA React"
+        - "WP-2.4 — KDS Cocina"
+        - "WP-2.5 — Dashboard conectividad"
+        - "WP-2.6 — Impresión LAN"
+        - "WP-3.1 — Outbox Pattern"
+        - "WP-3.2 — Sync Agent Edge"
+        - "WP-3.3 — Sync Engine Cloud"
+        - "WP-3.4 — Resolución de conflictos"
+        - "WP-3.5 — Chaos Tests"
+        - "WP-3.6 — Monitoreo sync"
+        - "WP-4.1 — Portal administración"
+        - "WP-4.2 — Stripe"
+        - "WP-4.3 — Onboarding automatizado"
+        - "WP-4.4 — Gestión de menú"
+        - "WP-4.5 — Reportes"
+        - "WP-5.1 — Agente IA soporte"
+        - "WP-5.2 — Bot WhatsApp"
+        - "WP-5.3 — Documentación técnica"
+        - "WP-5.4 — Programa piloto ISP"
+        - "WP-5.5 — Lanzamiento MVP"
+    validations:
+      required: true
+
+  - type: textarea
+    id: story
+    attributes:
+      label: Historia de Usuario
+      description: "Formato: Como [rol], quiero [acción], para [beneficio]."
+      placeholder: "Como mesero, quiero..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criterios de Aceptación
+      description: "Lista de condiciones verificables. Cada una debe ser testeable."
+      placeholder: |
+        - [ ] El sistema opera sin internet sin mensajes de error visibles
+        - [ ] El KDS recibe el pedido en < 2 segundos via LAN
+    validations:
+      required: true
+
+  - type: input
+    id: points
+    attributes:
+      label: Puntos de historia (Fibonacci)
+      placeholder: "1, 2, 3, 5, 8, 13, 21"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: offline
+    attributes:
+      label: Requiere validación offline
+      options:
+        - label: Esta historia debe probarse con red desconectada antes de marcar Done
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notas técnicas
+      description: "Consideraciones de implementación, dependencias, riesgos."
+      placeholder: "Opcional..."
