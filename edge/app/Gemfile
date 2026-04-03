@@ -1,0 +1,36 @@
+# ══════════════════════════════════════════════════════════════════
+#  edge/Gemfile
+# ══════════════════════════════════════════════════════════════════
+
+source "https://rubygems.org"
+
+ruby "~> 3.4"
+
+# ── Rails API-only ────────────────────────────────────────────────
+gem "rails", "~> 8.0"
+
+# ── Base de datos local ───────────────────────────────────────────
+gem "sqlite3", "~> 2.1"
+
+# ── Servidor web ──────────────────────────────────────────────────
+gem "puma", ">= 5.0"
+
+# ── WebSockets para KDS y Dashboard de conectividad ───────────────
+gem "actioncable"
+
+# ── Utilidades ────────────────────────────────────────────────────
+gem "bootsnap", require: false   # Acelera arranque
+gem "rack-cors"                  # CORS para PWA en puerto diferente
+
+# ── Sistema de archivos ───────────────────────────────────────────
+gem "sys-filesystem"             # Telemetría de disco para SyncAgent
+
+# ── Tests ─────────────────────────────────────────────────────────
+group :test do
+  gem "database_cleaner-active_record"
+  gem "minitest-reporters"
+end
+
+group :development, :test do
+  gem "debug"
+end
