@@ -1,0 +1,193 @@
+/* src/App.css */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --purple:       #534AB7;
+  --purple-light: #EEEDFE;
+  --purple-dark:  #3C3489;
+  --teal:         #0F6E56;
+  --teal-light:   #E1F5EE;
+  --amber:        #854F0B;
+  --amber-light:  #FAEEDA;
+  --red:          #A32D2D;
+  --red-light:    #FCEBEB;
+  --gray:         #5F5E5A;
+  --gray-light:   #F1EFE8;
+  --border:       rgba(0,0,0,0.12);
+  --radius-sm:    8px;
+  --radius-md:    12px;
+  --bg:           #f5f4f0;
+  --surface:      #ffffff;
+  --text:         #1a1a18;
+  --text-muted:   #5f5e5a;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout shell ──────────────────────────────────────────────── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 0.5px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.topbar-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--purple);
+}
+
+.bottomnav {
+  background: var(--surface);
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  order: 3;
+  flex-shrink: 0;
+}
+
+.bottomnav a {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-top: 2px solid transparent;
+  transition: all .15s;
+}
+
+.bottomnav a.active {
+  color: var(--purple);
+  border-top-color: var(--purple);
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  order: 2;
+  padding: 16px;
+}
+
+/* ── Badges ────────────────────────────────────────────────────── */
+.badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 99px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.badge-green  { background: var(--teal-light);   color: var(--teal);  }
+.badge-amber  { background: var(--amber-light);  color: var(--amber); }
+.badge-red    { background: var(--red-light);    color: var(--red);   }
+.badge-gray   { background: var(--gray-light);   color: var(--gray);  }
+.badge-purple { background: var(--purple-light); color: var(--purple);}
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn:hover    { background: var(--gray-light); }
+.btn:active   { transform: scale(0.98); }
+.btn-primary  { background: var(--purple); color: #fff; border-color: var(--purple); }
+.btn-primary:hover { background: var(--purple-dark); }
+.btn-success  { background: var(--teal); color: #fff; border-color: var(--teal); }
+.btn-success:hover { background: #085041; }
+.btn-danger   { background: var(--red-light); color: var(--red); border-color: var(--red-light); }
+.btn-full     { width: 100%; }
+
+/* ── Metric cards ──────────────────────────────────────────────── */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.metric-card {
+  background: var(--gray-light);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+}
+.metric-value.green { color: var(--teal);  }
+.metric-value.amber { color: var(--amber); }
+.metric-value.red   { color: var(--red);   }
+.metric-value.sm    { font-size: 16px; }
+
+/* ── Loading / empty states ────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.error-msg {
+  background: var(--red-light);
+  color: var(--red);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
