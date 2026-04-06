@@ -28,8 +28,13 @@
           Array(order_params[:items]).each do |item_params|
             product = @restaurant.products.find(item_params[:product_id])
             return render_error("#{product.name} no disponible") unless product.available?
-            order.order_items.create!(product: product, quantity: item_params[:quantity] || 1,
-                                      notes: item_params[:notes])
+            order.order_items.create!(
+                   product:      product,
+                   product_name: product.name,
+                   unit_price:   product.price,
+                   quantity:     item_params[:quantity] || 1,
+                   notes:        item_params[:notes]
+                   )
           end
 
           table.update!(status: "occupied")
