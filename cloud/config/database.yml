@@ -1,11 +1,12 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  host: 127.0.0.1
+  host: localhost
   port: 5432
   username: postgres
-  password: resilios123
+  password: Mojito2025..
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  sslmode: disable
 
 development:
   <<: *default
