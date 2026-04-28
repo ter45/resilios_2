@@ -48,16 +48,17 @@ export default defineConfig({
       }
     })
   ],
-  server: {
+server: {
   proxy: {
     '/api': {
-      target: 'http://127.0.0.1:3000',
+      target: 'http://127.0.0.1:9000',
       changeOrigin: true
     },
     '/health': {
-      target: 'http://127.0.0.1:3000',
+      target: 'http://127.0.0.1:9000',
       changeOrigin: true
     }
   }
 }
+
 })
